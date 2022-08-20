@@ -9,7 +9,6 @@ lazy val root = (project in file("."))
     idePackagePrefix := Some("org.shestero.vals")
   )
 
-
 val catsVersion = "2.7.0"
 val monixVersion = "3.4.0"
 
