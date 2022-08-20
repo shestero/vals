@@ -9,7 +9,7 @@ import scala.annotation.targetName
 import VT._
 import VVal._
 
-case class VVals(vs: Observable[VVal], isArray: Boolean = true, classTag: String = emptyTag) {
+case class VVals(vs: Observable[VVal], classTag: String = emptyTag, isArray: Boolean = true) {
   def get = vs
 
   def skipNulls = get.collect(vv => vv.get[VTypes] match {
@@ -51,12 +51,12 @@ case class VVals(vs: Observable[VVal], isArray: Boolean = true, classTag: String
 }
 
 object VVals {
-  def fromIterable(vals: Iterable[VVal], isArray: Boolean = true, classTag: String = emptyTag): VVals =
-    new VVals(Observable.fromIterable(vals), isArray, classTag)
+  def fromIterable(vals: Iterable[VVal], classTag: String = emptyTag, isArray: Boolean = true): VVals =
+    new VVals(Observable.fromIterable(vals), classTag, isArray)
 
   @targetName("apply1") def apply(vals: VVal*): VVals = new VVals(Observable.fromIterator(Task {
     vals.iterator
-  }), false)
+  }), emptyTag,false)
 
   @targetName("apply2") def apply(vals: VTypes | Int*): VVals =
     new VVals(Observable.fromIterator(Task {
@@ -65,5 +65,5 @@ object VVals {
         case v: VTypes => VVal(v, i.toString)
       }
       ).iterator
-    }), false)
+    }), emptyTag,false)
 }
