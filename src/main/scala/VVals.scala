@@ -9,7 +9,7 @@ import scala.annotation.targetName
 import VT._
 import VVal._
 
-case class VVals(vs: Observable[VVal], classTag: String = emptyTag, isArray: Boolean = true) {
+case class VVals(vs: Observable[VVal], tag: String = emptyTag, attrs: VAttrs = emptyAttrs) {
   def get = vs
 
   def skipNulls = get.collect(vv => vv.get[VTypes] match {
@@ -21,7 +21,8 @@ case class VVals(vs: Observable[VVal], classTag: String = emptyTag, isArray: Boo
 
   def keys: Observable[VTag] = get.map(_.tag)
 
-  def isKeysValid: Task[Boolean] = keys.toListL.map(!_.contains(emptyTag))
+  def isKeysValid: Task[Boolean] = keys.forallL(!_.contains(emptyTag)) // keys.toListL.map(!_.contains(emptyTag))
+  //Seq[String]("a","").toIterable.forall(!_.contains(emptyTag))
 
   def isKeysUnique: Task[Boolean] = keys.toListL.map(keys => keys.distinct.length == keys.length)
 
@@ -48,15 +49,18 @@ case class VVals(vs: Observable[VVal], classTag: String = emptyTag, isArray: Boo
 
   def get(tag: String): VVals = VVals(vs.filter(_.tag == tag))
   def get(i: Int): VVals = get(i.toString)
+
+  def getOp(tag: String): Task[Option[VVal]] = get(tag).get.headOptionL
+  def getOp(i: Int): Task[Option[VVal]] = get(i).get.headOptionL
 }
 
 object VVals {
-  def fromIterable(vals: Iterable[VVal], classTag: String = emptyTag, isArray: Boolean = true): VVals =
-    new VVals(Observable.fromIterable(vals), classTag, isArray)
+  def fromIterable(vals: Iterable[VVal], tag: String = emptyTag, attrs: VAttrs = emptyAttrs): VVals =
+    new VVals(Observable.fromIterable(vals), tag, attrs)
 
   @targetName("apply1") def apply(vals: VVal*): VVals = new VVals(Observable.fromIterator(Task {
     vals.iterator
-  }), emptyTag,false)
+  }), emptyTag, emptyAttrs)
 
   @targetName("apply2") def apply(vals: VTypes | Int*): VVals =
     new VVals(Observable.fromIterator(Task {
@@ -65,5 +69,5 @@ object VVals {
         case v: VTypes => VVal(v, i.toString)
       }
       ).iterator
-    }), emptyTag,false)
+    }), emptyTag, emptyAttrs)
 }

@@ -4,7 +4,8 @@ import monix.eval.Task
 import monix.execution.Scheduler
 import monix.reactive.Observable
 
-case class VTable(body: Observable[VVals], header: Option[VVals] = None) {
+import VVal.emptyTag
+case class VTable(body: Observable[VVals], tag: String = emptyTag, header: Option[VVals] = None) {
 
   def test(implicit sch: Scheduler): Task[Boolean] =
     header.map(h => body.map(_.isHeaderValid(h)).flatMap(Observable.fromTask).forallL(identity)).getOrElse(Task.pure(true))

@@ -23,11 +23,12 @@ object VT {
     case _: Double  => VT_double
     case _: Long    => VT_long
     case _: Instant => VT_datetime
-    case vs: VVals  => if (vs.isArray) VT_array else VT_nested
+    //case vs: VVals  => if (vs.isArray) VT_array else VT_nested
+    case vs: VVals  => VT_nested
     case Some(v)    => apply(v)
     case None       => VT_null
     case null       => VT_null
-    case _          => VT_unknown // VT_null
+    case _          => VT_unknown
 
   def apply(v: VVal): VT = apply(v.v)
 }
